@@ -4,10 +4,7 @@ use warnings;
 use File::Find; 
 use File::Basename;
 
-my @deadComponents = ( "cutenet", "skylinecontour", "synteny" );
-
-my $dir = '/workspace/gewb/geworkbench-core';
-#my $dir = '/eclipse_workspaces/geworkbench_2_2_0/geworkbench-core';
+my $dir = 'C:/Users/zji/git/geworkbench-web/src';
 
 my $largestFileName = "";
 my $largestFileSize = 0;
@@ -21,20 +18,18 @@ my %componentLongest;
 my $total = 0;
 my $x = 0;
 
-my $d = join "|", @deadComponents;
-
 sub process_file {
 	
-	if ($File::Find::name !~ m/components\/($d)\/.+\.java/ && $File::Find::name =~ m/\.java$/) {
+	if ($File::Find::name =~ m/\.java$/) {
 		$x++;
 		
 		my $bname = basename $File::Find::name;
 		my $componentName = "";
 		
-		if($File::Find::name =~ m/components\/(\w+).+\.java/) {
+		if($File::Find::name =~ m/geworkbenchweb\/(\w+).+\.java/) {
 			$componentName = $1;
 		} else {
-			$componentName = "core";
+			$componentName = "UNRECOGNIZED-PACKAGE";
 		}
 		$componentPackage{$bname} = $componentName;
 		
@@ -63,14 +58,21 @@ sub process_file {
 find(\&process_file, $dir); 
 
 #print %loc;
+print "----------------------------------------\n";
+print "filename\tLOC\tpackage\n";
+print "----------------------------------------\n";
 foreach my $filename ( sort { $loc{$a} <=> $loc{$b} }  keys %loc ) {
 	print $filename, "\t", $loc{$filename}, "\t", $componentPackage{$filename}, "\n";
 }
 
+print "----------------------------------------\n";
+print "package\tLOC\tfile count\tlongest\n";
+print "----------------------------------------\n";
 foreach my $cname ( sort { $componentLoc{$a} <=> $componentLoc{$b} }  keys %componentLoc ) {
 	print $cname, "\t", $componentLoc{$cname}, "\t", $componentFileCount{$cname}, "\t", $componentLongest{$cname}, "\n";
 }
 
+print "===summary===\n";
 print "File count ".$x."\n";
 print "Total LOC ".$total."\n";
 print "Largest file ".$largestFileName."\n";
